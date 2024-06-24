@@ -1,9 +1,9 @@
 import os
 import pickle
 
-from utilities.file import fileUtils
-from utilities.reporting import Reporting
-from options import options
+from src.utilities.file import fileUtils
+from src.utilities.reporting import Reporting
+from src.options import options
 # from settings import DICTIONARY_PICKLE_FILE
 
 

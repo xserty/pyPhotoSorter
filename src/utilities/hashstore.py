@@ -1,8 +1,6 @@
 import os
 import hashlib
-import mmap
 from datetime import datetime
-from utilities.reporting import Reporting
 
 
 class HashStore:

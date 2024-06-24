@@ -1,6 +1,6 @@
 import time
 
-from utilities.hashstore import HashStore
+from src.utilities.hashstore import HashStore
 
 
 class DuplicatesManager:
