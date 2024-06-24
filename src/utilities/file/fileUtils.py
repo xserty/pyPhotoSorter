@@ -1,13 +1,16 @@
+import errno
 import filecmp
 import hashlib
 import os
 import shutil
+import subprocess
 from datetime import datetime
 from pathlib import Path
+from sys import platform
 
-from utilities.reporting import Reporting
-from settings import EXIFTOOL_CONFIG_FILE, HELPER_EXIF_CONFIG_FILE
-from options import options
+from src.utilities.reporting import Reporting
+# from src.settings import EXIFTOOL_CONFIG_FILE, HELPER_EXIF_CONFIG_FILE
+from src.options import options, settings
 
 def copy_file(full_filename, destination):
     """
@@ -97,28 +100,28 @@ def create_sorted_img_dir():
 
 def generate_exiftool_config():
     # Todo: Surley this can be improved too!!
-    exif_conf_file = Path(EXIFTOOL_CONFIG_FILE)
+    exif_conf_file = Path(settings.EXIFTOOL_CONFIG_FILE)
     if exif_conf_file.is_file():
 
         # check if files differ
         print("WARNING: doing a shallow compare on EXIFTool_config files")
-        if not filecmp.cmp(EXIFTOOL_CONFIG_FILE, HELPER_EXIF_CONFIG_FILE, shallow=True):
+        if not filecmp.cmp(settings.EXIFTOOL_CONFIG_FILE, settings.HELPER_EXIF_CONFIG_FILE, shallow=True):
             print("In generate_exiftool_config...")
-            if os.path.exists(EXIFTOOL_CONFIG_FILE):
+            if os.path.exists(settings.EXIFTOOL_CONFIG_FILE):
                 print("Renaming ExifTool_config old file...")
                 dt_string = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                os.rename(EXIFTOOL_CONFIG_FILE, EXIFTOOL_CONFIG_FILE + '_' + dt_string + '.bak')
+                os.rename(settings.EXIFTOOL_CONFIG_FILE, settings.EXIFTOOL_CONFIG_FILE + '_' + dt_string + '.bak')
             # the file ExifTool_config does not exist
-            print(f"Creating {EXIFTOOL_CONFIG_FILE}.")
-            shutil.copy(HELPER_EXIF_CONFIG_FILE, f"{EXIFTOOL_CONFIG_FILE}")
-            print(f"Done creating {EXIFTOOL_CONFIG_FILE}.")
+            print(f"Creating {settings.EXIFTOOL_CONFIG_FILE}.")
+            shutil.copy(settings.HELPER_EXIF_CONFIG_FILE, f"{settings.EXIFTOOL_CONFIG_FILE}")
+            print(f"Done creating {settings.EXIFTOOL_CONFIG_FILE}.")
         else:
-            print(f"No need to replace {EXIFTOOL_CONFIG_FILE}.")
+            print(f"No need to replace {settings.EXIFTOOL_CONFIG_FILE}.")
 
     else:
-        print(f"Creating {EXIFTOOL_CONFIG_FILE}.")
-        shutil.copy(HELPER_EXIF_CONFIG_FILE, f"{EXIFTOOL_CONFIG_FILE}")
-        print(f"Done creating {EXIFTOOL_CONFIG_FILE}.")
+        print(f"Creating {settings.EXIFTOOL_CONFIG_FILE}.")
+        shutil.copy(settings.HELPER_EXIF_CONFIG_FILE, f"{settings.EXIFTOOL_CONFIG_FILE}")
+        print(f"Done creating {settings.EXIFTOOL_CONFIG_FILE}.")
 
 
 def getImageFormat(full_filename):
@@ -143,3 +146,22 @@ def getImageFormat(full_filename):
     img_format = file_extension.split('.')[1]
     print(f"Format: {img_format}")
     return img_format
+
+# Found following here:
+# https://stackoverflow.com/questions/55394905/how-to-find-the-location-of-an-executable-in-python
+def _is_tool(name):
+    try:
+        devnull = open(os.devnull)
+        subprocess.Popen([name], stdout=devnull, stderr=devnull).communicate()
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            return False
+    return True
+
+def find_prog(prog):
+    if _is_tool(prog):
+        cmd = "where" if platform.system() == "Windows" else "which"
+        try:
+            return subprocess.check_output([cmd, prog])
+        except subprocess.CalledProcessError:
+            return None

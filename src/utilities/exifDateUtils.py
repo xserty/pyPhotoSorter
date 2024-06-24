@@ -11,18 +11,19 @@ from exiftool.exceptions import ExifToolExecuteError
 from dateutil import parser
 from dateutil.parser import ParserError
 
-from settings import EXIFTOOL_CONFIG_FILE, EXIFTOOL_PATH
+from src.options.settings import EXIFTOOL_CONFIG_FILE
+from src.utilities.file import fileUtils
 
 
 # [ToDo] Implement testing for all methods!!
 
-def _getDateInFilename(ff_name):
+def _get_date_in_filename(ff_name):
     filename = os.path.basename(ff_name)
     regex1 = re.compile(r"(\d{8})")  # regex pattern to capture possible date
-    matchArray = regex1.findall(filename)
-    if not matchArray:
+    match_array = regex1.findall(filename)
+    if not match_array:
         return False
-    date = matchArray[0]
+    date = match_array[0]
     year = date[0:4]
     month = date[4:6]
     day = date[6:8]
@@ -32,7 +33,7 @@ def _getDateInFilename(ff_name):
     return result
 
 
-def __getHourMinSec(time):
+def __get_hour_min_sec(time):
     # if time is empty, return zeros
     if not time:
         return '00', '00', '00'
@@ -52,7 +53,7 @@ def __getHourMinSec(time):
     return h, m, s
 
 
-def __isAlphanumericDate(date_time):
+def __is_alphanumeric_date(date_time):
     """
     Returns True if date is of format: 'Mon dd, YYYY' e.g.: jun 11, 2014 6:33:30
     Note: this method just checks the date format, it does not check the time portion
@@ -70,7 +71,7 @@ def __isAlphanumericDate(date_time):
 
 
 # [ToDo] Implement testing for at least this method!!
-def __formatDate(date_time_str):
+def __format_date(date_time_str):
     result = ''
     # first remove any trailing spaces
     dt = str(date_time_str).strip()
@@ -98,9 +99,9 @@ def __formatDate(date_time_str):
         except IndexError as er:
             print("# No time found in date: %s" % dt)
         # split the date
-        dd, mm, yy = getYearMonthDay(date)
+        dd, mm, yy = get_year_month_day(date)
         # split the time
-        hh, mm, ss = __getHourMinSec(time)
+        hh, mm, ss = __get_hour_min_sec(time)
         result = yy + ':' + mm + ':' + dd + ' ' + hh + ':' + mm + ':' + ss
     elif len(dt) == 22 and dt[19] == '.':
         # [ToDo] Insert proper checks to see if there are milliseconds in date-time format
@@ -108,7 +109,7 @@ def __formatDate(date_time_str):
         # lets 'just' truncate any milliseconds ater the date-time:
         # '2008:11:29 14:47:12.06' becomes '2008:11:29 14:47:12'
         dt = dt[0:19]
-        result = getCorrectDateFormat(dt)
+        result = get_correct_date_format(dt)
     elif len(dt) >= 23:
         # handle this date format: '2010 :09 :20 16 :20 :51'
         if dt[4] == ' ' and dt[8] == ' ' and dt[12] == ' ' and dt[15] == ' ' and dt[19] == ' ':
@@ -124,12 +125,12 @@ def __formatDate(date_time_str):
 
         # catch these invalid dates: '2010:9:22:1:57     2'
         # catch these invalid dates: '2007:1227:27 13:27:3'
-        if __isAlphanumericDate(dt):
+        if __is_alphanumeric_date(dt):
             # Most likely it's a date in this format: 'jun 11, 2014 6:33:30'
             # [ToDo] Remove the use of external parser!
             result = parser.parse(dt)
             print("\t\tParsed this: %s" % result)
-            result = getCorrectDateFormat(result.strftime("%Y:%d/%m %H:%M:%S"))
+            result = get_correct_date_format(result.strftime("%Y:%d/%m %H:%M:%S"))
             print("\t\tGot this --> %s" % result)
         elif '  ' in dt:
             # lets check for this date: 2006.09.17  15:32:15	(valid, but with double spaces for some reason!)
@@ -137,10 +138,10 @@ def __formatDate(date_time_str):
             # remove double spaces
             dt = dt.replace('  ', ' ')
             try:
-                result = getCorrectDateFormat(dt)
+                result = get_correct_date_format(dt)
             except ParserError:
                 # if a PerserError was raised, then can be something like this: '2010:9:22:1:57     2'
-                yy, mm, dd = getYearMonthDay(dt)
+                yy, mm, dd = get_year_month_day(dt)
                 result = yy + ':' + mm + ':' + dd + ' 00:00:00'
                 if len(result) != 19:
                     # If getYearMonthDay went wrong, return an empty date-time
@@ -150,7 +151,7 @@ def __formatDate(date_time_str):
             print("ERROR: Could not find a matching pattern for this date: %s " % dt)
             # If getYearMonthDay went wrong, return an empty date-time
             result = ''
-        elif ' '  in dt and (len(dt.split(' ')[1]) > 8):
+        elif ' ' in dt and (len(dt.split(' ')[1]) > 8):
             # [ToDo] Insert checks to see if there is a time-zone that can be truncated
             # we might have these kinda dates:
             # '2013:10:21 13:19:01Z'    (valid)
@@ -158,7 +159,7 @@ def __formatDate(date_time_str):
             # lets 'just' truncate any time zone ater the date-time:
             # '2013:10:21 13:19:01Z' becomes '2013:10:21 13:19:01'
             dt = dt[0:19]
-            result = getCorrectDateFormat(dt)
+            result = get_correct_date_format(dt)
         else:
             y, m, d = ('',) * 3
             if len(dt.split(':')[0]) == len(dt.split(':')[1]):
@@ -174,7 +175,7 @@ def __formatDate(date_time_str):
                     # If getYearMonthDay went wrong, return an empty date-time
                     result = ''
             else:
-                # [ToDo] Ambigous dates... never came across it yet...
+                # [ToDo] Ambiguous dates... never came across it yet...
                 # could be something like this: '2007:127:27 13:26:3'? where year = 2007, month = 1, day = 27?
                 # could be something like this: '2007:127:27 13:26:3'? where year = 2007, month = 12, day = 7?
                 print("ERROR: Ambiguous date. Could not find a matching pattern for this date: %s " % dt)
@@ -183,12 +184,12 @@ def __formatDate(date_time_str):
     elif len(dt) == 10:
         # Maybe we only got a date, no time
         dt = dt + ' 00:00:00'
-        result = getCorrectDateFormat(dt)
+        result = get_correct_date_format(dt)
     elif len(dt) == 19:
         # we should have a correct date here...
         # except for this: 'jun 1, 2014 6:33:30' 	(valid)
         # [ToDo] parse 'jun 1, 2014 6:33:30' (valid date)
-        result = getCorrectDateFormat(dt)
+        result = get_correct_date_format(dt)
     else:
         # WARNING: IF WE GET TO THIS POINT, WE MISSED SOMETHING!!
         # [ToDo] not sure what we get here at this stage!!!
@@ -201,7 +202,7 @@ def __formatDate(date_time_str):
     return result
 
 
-def getCorrectDateFormat(date_time):
+def get_correct_date_format(date_time):
     if len(date_time) != 19:
         raise ParserError('Expected date-time length 19, get %s' % len(date_time))
     new_date_str = []
@@ -229,7 +230,7 @@ def getCorrectDateFormat(date_time):
     return result
 
 
-def getYearMonthDay(date):
+def get_year_month_day(date):
     y, m, d = ("",) * 3
     y = date.split(':')[0]
     if len(y) < 4:
@@ -243,7 +244,7 @@ def getYearMonthDay(date):
     return d, m, y
 
 
-def __getOldestExifDate(exif_array):
+def __get_oldest_exif_date(exif_array):
     date_array = []
     for prop in exif_array:
         tag_name = prop[0]
@@ -251,7 +252,7 @@ def __getOldestExifDate(exif_array):
             date_time = prop[1]
             # print(f"=== Found a date tag: {tag_name}: {date_time}")
             # Handle weird cases like '2011: 2: 5  0:13:27' or '2009:07:28:10:37:37' or ''
-            new_date = __formatDate(date_time)
+            new_date = __format_date(date_time)
             if len(new_date) == 0:
                 print("Empty date field.")
                 continue
@@ -278,7 +279,7 @@ def __getOldestExifDate(exif_array):
     return date_array[0]
 
 
-def __splitAll(path):
+def __split_all(path):
     allparts = []
     while 1:
         parts = os.path.split(path)
@@ -294,9 +295,9 @@ def __splitAll(path):
     return allparts
 
 
-def _getDateInFilePath(ff_name):
+def _get_date_in_file_path(ff_name):
     path = os.path.split(ff_name)[0]
-    parts = __splitAll(path)
+    parts = __split_all(path)
     # print("\tParts:", parts)
     i = 0
     for part in parts:
@@ -336,7 +337,8 @@ def _getDateInFilePath(ff_name):
         i += 1
     return None
 
-def _getTagsWithExifTool(ff_name):
+
+def _get_tags_with_exif_tool(ff_name):
     """
     Uses ExifTool to get exif tags from image file
     :param ff_name: image file
@@ -345,15 +347,14 @@ def _getTagsWithExifTool(ff_name):
     # Create an empty array
     __exif_result_array = []
     tags = []
-    # [ToDo] make it platform-independent
-    exiftool_path = EXIFTOOL_PATH
-    os.environ['EXIFTOOL_PATH'] = exiftool_path
+    exifTool_path = fileUtils.find_prog("exiftool").decode("utf-8")
+    os.environ['EXIFTOOL_PATH'] = exifTool_path
     # Open image to collect EXIF data
     # [ToDo] load config file not working... picking up '0000:00:00' dates. Maybe incompatible versions?
     exiftool.ExifTool.config_file = EXIFTOOL_CONFIG_FILE
-    with exiftool.ExifToolHelper() as ex:
     # with exiftool.ExifToolHelper(config_file=main.EXIFTOOL_CONFIG_FILE) as ex:
     #     print("Using: %s" % exiftool.ExifTool.config_file)
+    with exiftool.ExifToolHelper() as ex:
         try:
             tags = ex.get_metadata(ff_name)
         except UnicodeDecodeError as er:
@@ -384,7 +385,7 @@ def _getTagsWithExifTool(ff_name):
     return __exif_result_array
 
 
-def _getTagsWithExifread(ff_name):
+def _get_tags_with_exifread(ff_name):
     """
     Uses exifread to get exif tags from image file
     :param ff_name: image file
@@ -428,12 +429,13 @@ def _getTagsWithExifread(ff_name):
                 print("Error parsing tag %s: %s" % (i, str(er)))
     return __exif_result_array
 
-def getAllPossibleDates(ff_name, ignore_date_in_file_path=False):
+
+def get_all_possible_dates(ff_name, ignore_date_in_file_path=False):
     result = []
 
     if not ignore_date_in_file_path:
         # check if path contains a date
-        date = _getDateInFilePath(ff_name)
+        date = _get_date_in_file_path(ff_name)
         if date:
             # print("getDateInFilePath: %s" % date)
             result.append(date)
@@ -441,19 +443,19 @@ def getAllPossibleDates(ff_name, ignore_date_in_file_path=False):
         print("WARNING: Ignoring dates in file path (e.g.: /1999/08/27/)")
 
     # check if filename contains a date
-    date = _getDateInFilename(ff_name)
+    date = _get_date_in_filename(ff_name)
     if date:
         print("getDateInFilename: %s" % date)
         result.append(date)
-    exif_array = _getTagsWithExifTool(ff_name)
-    exif_array_2 = _getTagsWithExifread(ff_name)
+    exif_array = _get_tags_with_exif_tool(ff_name)
+    exif_array_2 = _get_tags_with_exifread(ff_name)
     if len(exif_array) < len(exif_array_2):
         print("======= WARNING: len(exif_array) = %s, len(exif_array_2) = %s" % (len(exif_array), len(exif_array_2)))
         print("=======          Exifread contains more tags")
     # print('exifArray:')
     # print(exif_array)
     # now we have exif_array full of date tags
-    date = __getOldestExifDate(exif_array)
+    date = __get_oldest_exif_date(exif_array)
     if date:
         result.append(date)
     # sort the list so that the oldest date is first

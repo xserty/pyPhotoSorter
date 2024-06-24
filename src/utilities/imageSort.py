@@ -4,12 +4,12 @@ from datetime import datetime as dt
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait, ALL_COMPLETED
 import re
 
-from options import options
-from utilities.exifDateUtils import getAllPossibleDates
-from utilities.file.fileUtils import generate_exiftool_config, create_sorted_img_dir
-from utilities.reporting import Reporting
-from utilities.psMediaDictionary import MediaDictionary
-from utilities.file import fileUtils
+from src.options import options
+from src.utilities.exifDateUtils import get_all_possible_dates
+from src.utilities.file.fileUtils import generate_exiftool_config, create_sorted_img_dir
+from src.utilities.reporting import Reporting
+from src.utilities.psMediaDictionary import MediaDictionary
+from src.utilities.file import fileUtils
 
 
 log = logging.getLogger('pyPhotoSorter.imageSort')
@@ -78,7 +78,7 @@ class ImageSort:
         # semaphore.acquire(blocking=True)
         # print("=== Semaphore value: ", semaphore._value)
         # get a sorted list of possible dates. position [0] being the oldest
-        list_of_possible_dates = getAllPossibleDates(full_filename, ignore_date_in_file_path=ignore_date_in_file_path)
+        list_of_possible_dates = get_all_possible_dates(full_filename, ignore_date_in_file_path=ignore_date_in_file_path)
 
         if not list_of_possible_dates:
             # move this file to unsorted

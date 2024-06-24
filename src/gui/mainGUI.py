@@ -7,9 +7,8 @@ from PySide6.QtCore import QSize, QRect
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QFrame, QMenuBar, QMenu, QCheckBox, \
     QMessageBox, QStatusBar, QSpinBox, QMainWindow, QPushButton, QFileDialog, QWidget, QProgressBar
 
-import options.options
-import settings
-from utilities import imageSort
+from src.options import options, settings
+from src.utilities import imageSort
 
 
 class MainGUI(QMainWindow):
@@ -111,9 +110,9 @@ class MainGUI(QMainWindow):
         self.ignore_date_in_path_checkbox.setToolTip("Ignore any dates pattern in the path of the media file")
         self.advanced_layout.addWidget(self.ignore_date_in_path_checkbox)
         self.max_num_of_threads_spinBox = QSpinBox()
-        self.max_num_of_threads_spinBox.setValue(options.options.max_num_of_threads)
+        self.max_num_of_threads_spinBox.setValue(options.max_num_of_threads)
         self.max_num_of_threads_spinBox.setMinimum(1)
-        self.max_num_of_threads_spinBox.setMaximum(options.options.max_num_of_threads)
+        self.max_num_of_threads_spinBox.setMaximum(options.max_num_of_threads)
         self.max_num_of_threads_spinBox.setMaximumWidth(40)
         self.max_num_of_threads_spinBox.setToolTip("Maximum number of threads used to sort media files")
         spinBox_label = QLabel("Maximum number of threads:")
@@ -172,7 +171,6 @@ class MainGUI(QMainWindow):
         # self.statusBar.setStyleSheet("background-color: yellow;")
         self.statusBar.showMessage("Ready.")
         self.setStatusBar(self.statusBar)
-        # opt = options.options
         self.set_gui_options()
         self.show()  # Widgets without a parent are invisible by default.
 
@@ -235,7 +233,7 @@ class MainGUI(QMainWindow):
         self.populate_options_instance()
 
         # Pass arguments via a dictionary
-        args_dict = {'img_dir': options.options.source_media_dir, 'sorted_dir': options.options.sorted_media_dir, 'unsorted_dir': options.options.unsorted_media_dir, 'deep_mode_hash': options.options.deep_mode_hash, 'ignore_date_in_path': options.options.ignore_date_in_path, 'regen_media_dict': options.options.regenerate_media_dictionary, 'cleanup_dictionary': options.options.cleanup_dictionary, 'max_threads_num': options.options.max_num_of_threads}
+        args_dict = {'img_dir': options.source_media_dir, 'sorted_dir': options.sorted_media_dir, 'unsorted_dir': options.unsorted_media_dir, 'deep_mode_hash': options.deep_mode_hash, 'ignore_date_in_path': options.ignore_date_in_path, 'regen_media_dict': options.regenerate_media_dictionary, 'cleanup_dictionary': options.cleanup_dictionary, 'max_threads_num': options.max_num_of_threads}
 
         # spanw process to sort media files
         MainGUI._proc = multiprocessing.Process(target=imageSort.main_call, kwargs=args_dict)
@@ -252,37 +250,37 @@ class MainGUI(QMainWindow):
 
     def load_options(self):
         print("Loading options from disk")
-        options.options.load_from_disk()
-        imageSort.thread_pool = ThreadPoolExecutor(max_workers=options.options.max_num_of_threads)
+        options.load_from_disk()
+        imageSort.thread_pool = ThreadPoolExecutor(max_workers=options.max_num_of_threads)
         self.set_gui_options()
 
     def set_gui_options(self):
-        if len(options.options.source_media_dir) > 0:
-            self.source_label.setText(options.options.source_media_dir)
-        if len(options.options.sorted_media_dir) > 0:
-            self.dest_label.setText(options.options.sorted_media_dir)
-        if len(options.options.unsorted_media_dir) > 0:
-            self.unsorted_label.setText(options.options.unsorted_media_dir)
-        self.deep_mode_hash_checkbox.setChecked(options.options.deep_mode_hash)
-        self.regenerate_media_dictionary_checkbox.setChecked(options.options.regenerate_media_dictionary)
-        self.cleanup_dictionary_checkbox.setChecked(options.options.cleanup_dictionary)
-        self.ignore_date_in_path_checkbox.setChecked(options.options.ignore_date_in_path)
-        self.max_num_of_threads_spinBox.setValue(options.options.max_num_of_threads)
+        if len(options.source_media_dir) > 0:
+            self.source_label.setText(options.source_media_dir)
+        if len(options.sorted_media_dir) > 0:
+            self.dest_label.setText(options.sorted_media_dir)
+        if len(options.unsorted_media_dir) > 0:
+            self.unsorted_label.setText(options.unsorted_media_dir)
+        self.deep_mode_hash_checkbox.setChecked(options.deep_mode_hash)
+        self.regenerate_media_dictionary_checkbox.setChecked(options.regenerate_media_dictionary)
+        self.cleanup_dictionary_checkbox.setChecked(options.cleanup_dictionary)
+        self.ignore_date_in_path_checkbox.setChecked(options.ignore_date_in_path)
+        self.max_num_of_threads_spinBox.setValue(options.max_num_of_threads)
 
     def save_options(self):
         print("Saving options to disk")
         self.populate_options_instance()
-        options.options.save_to_disk()
+        options.save_to_disk()
 
     def populate_options_instance(self):
-        options.options.source_media_dir = self.source_label.text()
-        options.options.sorted_media_dir = self.dest_label.text()
-        options.options.unsorted_media_dir = self.unsorted_label.text()
-        options.options.deep_mode_hash = self.deep_mode_hash_checkbox.isChecked()
-        options.options.regenerate_media_dictionary = self.regenerate_media_dictionary_checkbox.isChecked()
-        options.options.cleanup_dictionary = self.cleanup_dictionary_checkbox.isChecked()
-        options.options.ignore_date_in_path = self.ignore_date_in_path_checkbox.isChecked()
-        options.options.max_num_of_threads = self.max_num_of_threads_spinBox.value()
+        options.source_media_dir = self.source_label.text()
+        options.sorted_media_dir = self.dest_label.text()
+        options.unsorted_media_dir = self.unsorted_label.text()
+        options.deep_mode_hash = self.deep_mode_hash_checkbox.isChecked()
+        options.regenerate_media_dictionary = self.regenerate_media_dictionary_checkbox.isChecked()
+        options.cleanup_dictionary = self.cleanup_dictionary_checkbox.isChecked()
+        options.ignore_date_in_path = self.ignore_date_in_path_checkbox.isChecked()
+        options.max_num_of_threads = self.max_num_of_threads_spinBox.value()
 
     def quit_application(self):
         print("Exiting the application!")

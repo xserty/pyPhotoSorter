@@ -1,6 +1,7 @@
 import re
+import sys
 
-file_extension= "~5~"  # can can also be like '~12~'
+file_extension = "~5~"  # can can also be like '~12~'
 regex = re.compile(r"~\d*~")
 
 match file_extension:

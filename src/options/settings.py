@@ -1,7 +1,5 @@
 import os
 
-from options import options
-
 # #################### CONSTANTS ########################
 HOME_DIR = os.path.expanduser("~")
 # WORK_DIR = os.path.join(os.getcwd(), "..")
@@ -9,8 +7,8 @@ WORK_DIR = os.getcwd()
 print("WORK_DIR:", WORK_DIR)
 
 # ################### ExifTool_Config ###################
-EXIFTOOL_CONFIG_FILENAME = ".ExifTool_config"
-HELPER_FILES_DIR = "helper_files"
+EXIFTOOL_CONFIG_FILENAME = "../.ExifTool_config"
+HELPER_FILES_DIR = "../helper_files"
 # EXIFTOOL_CONFIG_FILE = os.path.join(HOME_DIR, EXIFTOOL_CONFIG_FILENAME)
 EXIFTOOL_CONFIG_FILE = os.path.join(WORK_DIR, EXIFTOOL_CONFIG_FILENAME)
 # print("EXIFTOOL_CONFIG_FILE: %s" % EXIFTOOL_CONFIG_FILE)
@@ -18,7 +16,7 @@ HELPER_EXIF_CONFIG_FILE = os.path.join(WORK_DIR, HELPER_FILES_DIR, EXIFTOOL_CONF
 
 # Exiftool executable
 #exiftool_path = os.path.abspath("./exiftool.exe")
-EXIFTOOL_PATH = os.path.abspath("/usr/bin/exiftool")
+# EXIFTOOL_PATH = os.path.abspath("/usr/bin/exiftool")
 
 # #################### Pickle ###########################
 # DICTIONARY_PICKLE_FILE = os.path.join(options.sorted_media_dir, 'psMediaDictionary.dat')
