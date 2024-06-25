@@ -347,8 +347,8 @@ def _get_tags_with_exif_tool(ff_name):
     # Create an empty array
     __exif_result_array = []
     tags = []
-    exifTool_path = fileUtils.find_prog("exiftool").decode("utf-8")
-    os.environ['EXIFTOOL_PATH'] = exifTool_path
+    exiftool_path = fileUtils.find_prog("exiftool").decode("utf-8")
+    os.environ['EXIFTOOL_PATH'] = exiftool_path
     # Open image to collect EXIF data
     # [ToDo] load config file not working... picking up '0000:00:00' dates. Maybe incompatible versions?
     exiftool.ExifTool.config_file = EXIFTOOL_CONFIG_FILE

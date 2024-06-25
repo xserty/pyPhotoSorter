@@ -5,9 +5,9 @@ from src.utilities.hashstore import HashStore
 
 class DuplicatesManager:
 
-    def __init__(self, hashStore_filename, hashStore_duplicates_filename):
-        self.hst_filename = hashStore_filename
-        self.hst_dup_filename = hashStore_duplicates_filename
+    def __init__(self, hashstore_filename, hashstore_duplicates_filename):
+        self.hst_filename = hashstore_filename
+        self.hst_dup_filename = hashstore_duplicates_filename
         self.elapsed_time = 0
 
     # Decorator to calculate duration taken by any function
