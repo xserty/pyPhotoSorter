@@ -88,7 +88,7 @@ function usage() {
 	echo "		-c:		Image files are copied across the new destination directory."
 	echo "		-m:		Image files are moved across the new destination directory."
 	echo "		-d:		[NOT YET IMPLEMENTED] Delete known and ignored files (ini|411|thm|htm|txt|db). Warning: can't undo this operation! Use carefully!"
-	echo "		-i:		[NOT YET IMPLEMENTED] Interactive mode. Script askes user action in case of errors."
+	echo "		-i:		[NOT YET IMPLEMENTED] Interactive mode. Script asks user action in case of errors."
 	echo "		-l:		Log file."
 	echo "		-G:		Regenerate CRC file from images located in <destDir>. To be used in conjunction with -D <destDir> option."
 	echo "		-u:		[NOT YET IMPLEMENTED] Delete newest duplicate files image directory located in <destDir>. Used in conjunction with -D <destDir> option."
@@ -662,7 +662,7 @@ delDupImages() {
 	sed -i '/^$/d' $dupCRCFile
 
 #	while IFS= read -r line <&3; do {
-#		# If lenght of $line>0
+#		# If length of $line>0
 #		if [ -n "$line" ]; then
 #			printf '%s\n' "$line" | cut -d "," -f 1 || exit
 ##			printf '%s\n' "$line" | cut -d "," -f 3 || exit
@@ -674,7 +674,7 @@ delDupImages() {
 
 	while IFS= read -r line <&3; do {
 		echo "line=$line"
-		# If lenght of $line>0
+		# If length of $line>0
 		if [ -n "$line" ]; then
 #			file=`printf '%s\n' "$line" | cut -d "," -f 2 || exit`
 			file=`echo "$line" | awk -F "," '{print $2}'`

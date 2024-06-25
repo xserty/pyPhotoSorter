@@ -55,53 +55,53 @@ value from EXIF.
 usage: exif_date.py [File name mask]"""
 
 
-def getExifCreationDate(path):
+def get_exif_creation_date(path):
     """Gets the earliest date from the file's EXIF header, returns time tuple"""
-    timeStamp = None
+    time_stamp = None
     try:
         import exif
         pf = exif.parse(path)
-        originalTime = pf.get('DateTimeOriginal')
-        if (originalTime):
-            timeStamp = datetime.strptime(originalTime, '%Y:%m:%d %H:%M:%S')
+        original_time = pf.get('DateTimeOriginal')
+        if original_time:
+            time_stamp = datetime.strptime(original_time, '%Y:%m:%d %H:%M:%S')
     except:
         pass
 
-    # sometimes exif lib failes to retrieve data
-    if not timeStamp:
+    # sometimes exif lib fails to retrieve data
+    if not time_stamp:
         response = os.popen(__path_to_exif + ' -x "%s"' % path, 'r')
         lines = response.read()
         matches = re.findall('<Date_and_Time.+?>(.*?)</Date_and_Time.+?>', lines)
         if len(matches):
-            timeStamp = min(*[datetime.strptime(x, '%Y:%m:%d %H:%M:%S') for x in matches])
-    return timeStamp
+            time_stamp = min(*[datetime.strptime(x, '%Y:%m:%d %H:%M:%S') for x in matches])
+    return time_stamp
 
 
-def getFileDates(path):
+def get_file_dates(path):
     """Returns a dictionary of file creation (ctime), modification (mtime), exif (exif) dates"""
-    dates = {'exif': getExifCreationDate(path), 'mtime': datetime.utcfromtimestamp(os.path.getmtime(path)),
+    dates = {'exif': get_exif_creation_date(path), 'mtime': datetime.utcfromtimestamp(os.path.getmtime(path)),
              'ctime': datetime.utcfromtimestamp(os.path.getctime(path))}
     return dates
 
 
-def setFileDates(fileName, dates):
+def set_file_dates(filename, dates):
     """Sets file modification and creation dates to the specified value"""
     if __use_win_32:
-        filehandle = win32file.CreateFile(fileName, win32file.GENERIC_WRITE, 0, None, win32con.OPEN_EXISTING, 0, None)
+        filehandle = win32file.CreateFile(filename, win32file.GENERIC_WRITE, 0, None, win32con.OPEN_EXISTING, 0, None)
         win32file.SetFileTime(filehandle, *(dates['exif'],) * 3)
         filehandle.close()
     else:
-        os.utime(fileName, (time.mktime(dates['exif'].utctimetuple()),) * 2)
+        os.utime(filename, (time.mktime(dates['exif'].utctimetuple()),) * 2)
 
 
-def fixFileDate(fileName):
+def fix_file_date(filename):
     """Reads file's EXIF header, gets the earliest date and sets it to the file"""
-    dates = getFileDates(fileName)
+    dates = get_file_dates(filename)
     if dates['exif']:
         cmp_time = lambda x, y: x - y > TEN_MINUTES
         diff = [cmp_time(dates[x], dates['exif']) for x in ('mtime', 'ctime')]
         if sum(diff):
-            setFileDates(fileName, dates)
+            set_file_dates(filename, dates)
         return dates, diff
     else:
         return dates, None
@@ -115,14 +115,14 @@ def main(args):
     if not len(args):
         usage()
         return - 1
-    processedFiles = []
+    processed_files = []
     for fileNameMask in args:
         if "*" in fileNameMask or "?" in fileNameMask:
             print("Looking for files with mask " + fileNameMask)
-        for fileName in filter(lambda x: x not in processedFiles, glob.glob(fileNameMask)):
-            processedFiles.append(fileName)
+        for fileName in filter(lambda x: x not in processed_files, glob.glob(fileNameMask)):
+            processed_files.append(fileName)
             try:
-                dates, diff = fixFileDate(fileName)
+                dates, diff = fix_file_date(fileName)
             except Exception as e:
                 print(e)
                 diff = None

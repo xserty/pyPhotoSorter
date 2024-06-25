@@ -38,7 +38,7 @@ class MainGUI(QMainWindow):
         self.targetArea.setObjectName("targetArea")
 
         # menuBar
-        self._createMenuBar()
+        self._create_menu_bar()
 
         source_button = QPushButton("Select Folder")
         source_button.setFixedSize(QSize(130, 30))
@@ -174,7 +174,7 @@ class MainGUI(QMainWindow):
         self.set_gui_options()
         self.show()  # Widgets without a parent are invisible by default.
 
-    def _createMenuBar(self):
+    def _create_menu_bar(self):
         menuBar = QMenuBar()
         # File menu
         fileMenu = QMenu("&File", self)
@@ -235,7 +235,7 @@ class MainGUI(QMainWindow):
         # Pass arguments via a dictionary
         args_dict = {'img_dir': options.source_media_dir, 'sorted_dir': options.sorted_media_dir, 'unsorted_dir': options.unsorted_media_dir, 'deep_mode_hash': options.deep_mode_hash, 'ignore_date_in_path': options.ignore_date_in_path, 'regen_media_dict': options.regenerate_media_dictionary, 'cleanup_dictionary': options.cleanup_dictionary, 'max_threads_num': options.max_num_of_threads}
 
-        # spanw process to sort media files
+        # spawn process to sort media files
         MainGUI._proc = multiprocessing.Process(target=imageSort.main_call, kwargs=args_dict)
         MainGUI._proc.daemon = True
         MainGUI._proc.start()

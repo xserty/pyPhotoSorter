@@ -5,21 +5,22 @@ from datetime import datetime
 
 class HashStore:
     """
-    Should be usnig HashMaps for this
+    Should be using HashMaps for this
     https://stackoverflow.com/questions/51209510/serializing-hashmap-and-writing-into-a-file
     Interesting:
     https://codereview.stackexchange.com/questions/130063/implementing-cleartable-grow-and-shrink-on-a-hash-table
     Store file path, hash, size and oldest date-time in csv format
     """
-    def __init__(self, hashStore_filename, hashStore_duplicates_filename, isFindDuplicates=False):
+    def __init__(self, hashstore_filename, hashstore_duplicates_filename, is_find_duplicates=False):
         print("Entered 'init' method...")
-        self.hst_filename = hashStore_filename
-        self.hst_dup_filename = hashStore_duplicates_filename
+        self.hst_value = ''
+        self.hst_filename = hashstore_filename
+        self.hst_dup_filename = hashstore_duplicates_filename
         self.media_oldest_date = ''
         self.fd = None
         self.dup_fd = None
-        self.isFindDuplicates = isFindDuplicates
-        if not isFindDuplicates:
+        self.isFindDuplicates = is_find_duplicates
+        if not is_find_duplicates:
             print("Creating HashStore files...")
             try:
                 if os.path.exists(self.hst_filename):
@@ -45,8 +46,8 @@ class HashStore:
                 mode = 'w+'
             self.fd = open(self.hst_filename, mode)
             self.dup_fd = open(self.hst_dup_filename, mode)
-            self.writeHstHeaders()
-            self.writeHstHeaders(isDup=True)
+            self.write_hst_headers()
+            self.write_hst_headers(is_dup=True)
         except IOError as ex:
             print(f"ERROR: An error occurred while opening HashStore files: {ex}")
         return self.fd
@@ -58,8 +59,8 @@ class HashStore:
         self.dup_fd.flush()
         self.dup_fd.close()
 
-    def writeHstHeaders(self, isDup=False):
-        if not isDup:
+    def write_hst_headers(self, is_dup=False):
+        if not is_dup:
             self.fd.write("# HashStore\n")
             self.fd.write(f"# Generated on {datetime.now()}\n")
             self.fd.write("#\n")
@@ -76,58 +77,58 @@ class HashStore:
             self.dup_fd.write("# ################################################################################\n")
             self.dup_fd.write("#\n")
 
-    def writeToFile(self, isHstDuplicate=False):
-        if not self.hst_value:
-            print("DEV ERROR: Unable to write to HashStore file. hst_value has not been set.")
-            return
-        if not isHstDuplicate:
-            try:
-                line = "{},{},{}".format(self.full_media_filename, self.hst_value, self.media_oldest_date)
-                self.fd.write(line)
-                self.fd.write("\n")
-            except OSError as er:
-                print("Unable to write HashStore file.")
-        else:
-            try:
-                line = "{},{},{}".format(self.full_media_filename, self.hst_value, self.media_oldest_date)
-                self.dup_fd.write(line)
-                self.dup_fd.write("\n")
-            except OSError as er:
-                print("Unable to write HashStore duplicates file.")
+    # def write_to_file(self, is_hst_duplicate=False):
+    #     if not self.hst_value:
+    #         print("DEV ERROR: Unable to write to HashStore file. hst_value has not been set.")
+    #         return
+    #     if not is_hst_duplicate:
+    #         try:
+    #             line = "{},{},{}".format(self.full_media_filename, self.hst_value, self.media_oldest_date)
+    #             self.fd.write(line)
+    #             self.fd.write("\n")
+    #         except OSError as er:
+    #             print("Unable to write HashStore file.")
+    #     else:
+    #         try:
+    #             line = "{},{},{}".format(self.full_media_filename, self.hst_value, self.media_oldest_date)
+    #             self.dup_fd.write(line)
+    #             self.dup_fd.write("\n")
+    #         except OSError as er:
+    #             print("Unable to write HashStore duplicates file.")
 
-    def setHstValue(self, full_media_filename):
-        self.full_media_filename = full_media_filename
-        file_stats = os.stat(self.full_media_filename)
-        size = file_stats.st_size
-        # Open,close, read file and calculate MD5 on its contents
-        with open(self.full_media_filename, 'rb') as f:
-            # read contents of the file
-            data = f.read()
-            # pipe contents of the file through
-            md5 = hashlib.md5(data).hexdigest()
-        hst_val = "{},{}".format(md5, size)
-        hst_val = self.__getHstValue()
+    # def set_hst_value(self, full_media_filename):
+    #     self.full_media_filename = full_media_filename
+    #     file_stats = os.stat(self.full_media_filename)
+    #     size = file_stats.st_size
+    #     # Open,close, read file and calculate MD5 on its contents
+    #     with open(self.full_media_filename, 'rb') as f:
+    #         # read contents of the file
+    #         data = f.read()
+    #         # pipe contents of the file through
+    #         md5 = hashlib.md5(data).hexdigest()
+    #     hst_val = "{},{}".format(md5, size)
+    #     hst_val = self.__getHstValue()
 
-    def isDuplicateMedia(self):
-        # [ToDo] this can be optimised by checking filesize by using a multi step approach.
-        #       If filesize is same, then we can eventually calculate MD5
-        result = False
-        self.fd.flush()
-        os.fsync(self.fd)
-        self.fd.seek(0)
-
-        while True:
-            # Get next line from file
-            line = self.fd.readline()
-            # if line is empty or end of file is reached
-            if not line:
-                break
-
-            if self.hst_value in line:
-                print("This is a DUPLICATE file: not moving/copying file.")
-                print("HashStore value: %s " % self.hst_value)
-                result = True
-                break
-
-        self.fd.seek(0, os.SEEK_END)
-        return result
+    # def is_duplicate_media(self):
+    #     # [ToDo] this can be optimised by checking filesize by using a multi step approach.
+    #     #       If filesize is same, then we can eventually calculate MD5
+    #     result = False
+    #     self.fd.flush()
+    #     os.fsync(self.fd)
+    #     self.fd.seek(0)
+    #
+    #     while True:
+    #         # Get next line from file
+    #         line = self.fd.readline()
+    #         # if line is empty or end of file is reached
+    #         if not line:
+    #             break
+    #
+    #         if self.hst_value in line:
+    #             print("This is a DUPLICATE file: not moving/copying file.")
+    #             print("HashStore value: %s " % self.hst_value)
+    #             result = True
+    #             break
+    #
+    #     self.fd.seek(0, os.SEEK_END)
+    #     return result

@@ -14,7 +14,7 @@ from src.utilities.file import fileUtils
 
 log = logging.getLogger('pyPhotoSorter.imageSort')
 
-# futtures list
+# futures list
 futures = []
 
 class ImageSort:
@@ -126,12 +126,12 @@ class ImageSort:
         print("Max threads set to: ", self.max_threads_num)
         with ThreadPoolExecutor(max_workers=self.max_threads_num) as executor:
 
-            for dirpath, dirnames, filenames in os.walk(self.img_dir):
+            for dir_path, dir_names, filenames in os.walk(self.img_dir):
                 for filename in filenames:
                     count += 1
                     Reporting.total_num_of_files += 1
 
-                    full_filename = os.path.join(dirpath, filename)
+                    full_filename = os.path.join(dir_path, filename)
                     print("")
                     print("===============================")
                     print(f"Found file {count}:\t\t\t{full_filename}")
@@ -144,7 +144,7 @@ class ImageSort:
                     # self._gui_instance.setProgress(int(percent))
 
                     # [ToDo] Match '~*~' format file extensions
-                    file_extension = fileUtils.getImageFormat(full_filename)
+                    file_extension = fileUtils.get_image_format(full_filename)
                     match file_extension.lower():
                         case 'crc' | 'bak' | 'ini' | '411' | 'thm' | 'htm' | 'html' | 'json' | 'txt' | 'db' | 'log' | 'tgz' | 'aae' | 'xcf' | 'zip' | 'pdf' | 'odt' | 'sla' | 'odg' | 'svg' | 'ora' | 'b64' | 'ind':
                             print("INFO: Ignoring file...")
@@ -189,11 +189,11 @@ class ImageSort:
         print("Max threads: ", self.max_threads_num)
         with ThreadPoolExecutor(max_workers=self.max_threads_num) as executor:
 
-            for dirpath, dirnames, filenames in os.walk(self.sorted_dir):
+            for dir_path, dir_names, filenames in os.walk(self.sorted_dir):
                 for filename in filenames:
                     count += 1
                     Reporting.total_num_of_files += 1
-                    full_filename = os.path.join(dirpath, filename)
+                    full_filename = os.path.join(dir_path, filename)
                     print("")
                     print("===============================")
 
@@ -204,7 +204,7 @@ class ImageSort:
                     print(display)
                     print(f"\t\t{full_filename}")
                     print("")
-                    file_extension = fileUtils.getImageFormat(full_filename)
+                    file_extension = fileUtils.get_image_format(full_filename)
 
                     match file_extension.lower():
                         case 'crc' | 'bak' | 'ini' | '411' | 'thm' | 'htm' | 'html' | 'json' | 'txt' | 'db' | 'log' | 'tgz' | 'aae' | 'xcf' | 'zip' | 'pdf' | 'odt' | 'sla' | 'odg' | 'svg' | 'ora' | 'b64' | 'ind':
@@ -255,12 +255,12 @@ def main_call(**args_dict):
     elif args_dict['cleanup_dictionary']:
         print("Cleaning up media pickle dictionary...")
         # Instantiate MediaDictionary
-        MD = MediaDictionary()
-        MD.sorted_media_dir = args_dict['sorted_dir']
-        MD.unsorted_media_dir = args_dict['unsorted_dir']
-        MD.load_dictionary_from_pickle_file()
-        MD.cleanup()
-        MD.save_dictionary_to_pickle_file()
+        md = MediaDictionary()
+        md.sorted_media_dir = args_dict['sorted_dir']
+        md.unsorted_media_dir = args_dict['unsorted_dir']
+        md.load_dictionary_from_pickle_file()
+        md.cleanup()
+        md.save_dictionary_to_pickle_file()
     else:
         if not args_dict['img_dir']:
             raise LookupError("Options module is empty!?")
@@ -268,7 +268,7 @@ def main_call(**args_dict):
         # unsorted_dir=options.options.unsorted_media_dir, deep_mode_hash=options.options.deep_mode_hash)
         img_sort = ImageSort(args_dict)
         img_sort._main_media_sort()
-        # cleanup the dictionary from entries that have no corrisponding sorted file
+        # cleanup the dictionary from entries that have no corresponding sorted file
         if img_sort.psMediaDictionary.is_cleanup_needed:
             img_sort.psMediaDictionary.cleanup()
         # save media dictionary to pickle file

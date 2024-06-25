@@ -22,11 +22,11 @@ class DuplicatesManager:
         return wrapper
 
     @measure_execution_time
-    def manageDuplicates(self):
+    def manage_duplicates(self):
         print('')
         print("Starting to manage Duplicates...")
         # with open(self.hst_filename, 'r+b') as fd, open(self.hst_dup_filename, 'r+b') as dup_fd:
-        hst = HashStore(self.hst_filename, self.hst_dup_filename, isFindDuplicates=True)
+        hst = HashStore(self.hst_filename, self.hst_dup_filename, is_find_duplicates=True)
         with hst:
             while True:
                 # Get next duplicate media line from duplicates file
@@ -74,7 +74,7 @@ class DuplicatesManager:
                         if dup_date < orig_date:
                             print("SORT OUT: Sorting dates of the two files differ... Need to exchange file location")
                             # now we have to do the following steps:
-                            # 1. copy older dulpicate media 'dup_file_name' to it's sorted img dir
+                            # 1. copy older duplicate media 'dup_file_name' to it's sorted img dir
                             # 2. add new line 'dup_line' to temp HashStore file
                             # 3. remove line from duplicates file (write nothing to new file)
                             # 4. remove newer media 'orig_file_name' from sorted img dir
@@ -86,7 +86,7 @@ class DuplicatesManager:
                 print("----------------")
 
     # @classmethod
-    # def findDuplicateInOfiginalFile(cls, hst, dup_hash_val, dup_file_size):
+    # def findDuplicateInOriginalFile(cls, hst, dup_hash_val, dup_file_size):
     #     orig_file_name = ''
     #     orig_hash_val = ''
     #     orig_file_size = ''

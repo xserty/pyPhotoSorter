@@ -106,7 +106,7 @@ def __format_date(date_time_str):
     elif len(dt) == 22 and dt[19] == '.':
         # [ToDo] Insert proper checks to see if there are milliseconds in date-time format
         # we might have this type of date-time format: '2008:11:29 14:47:12.06'
-        # lets 'just' truncate any milliseconds ater the date-time:
+        # lets 'just' truncate any milliseconds later the date-time:
         # '2008:11:29 14:47:12.06' becomes '2008:11:29 14:47:12'
         dt = dt[0:19]
         result = get_correct_date_format(dt)
@@ -140,7 +140,7 @@ def __format_date(date_time_str):
             try:
                 result = get_correct_date_format(dt)
             except ParserError:
-                # if a PerserError was raised, then can be something like this: '2010:9:22:1:57     2'
+                # if a ParserError was raised, then can be something like this: '2010:9:22:1:57     2'
                 yy, mm, dd = get_year_month_day(dt)
                 result = yy + ':' + mm + ':' + dd + ' 00:00:00'
                 if len(result) != 19:
@@ -156,7 +156,7 @@ def __format_date(date_time_str):
             # we might have these kinda dates:
             # '2013:10:21 13:19:01Z'    (valid)
             #  -------------------^     Time zone?
-            # lets 'just' truncate any time zone ater the date-time:
+            # lets 'just' truncate any time zone later the date-time:
             # '2013:10:21 13:19:01Z' becomes '2013:10:21 13:19:01'
             dt = dt[0:19]
             result = get_correct_date_format(dt)
@@ -408,7 +408,7 @@ def _get_tags_with_exifread(ff_name):
             #  we get this error when the exif data is saved as big endian
             print(f"ERROR: Unable to process this file. Unexpected {err=}, {type(err)=}")
             print("NOTE: File might be in Big Endian format")
-            print("ERROR: Unable to process this file. (KeyError. Exception cought: '%s')" % err)
+            print("ERROR: Unable to process this file. (KeyError. Exception caught: '%s')" % err)
 
         if not tags:
             # no tags found with exifread

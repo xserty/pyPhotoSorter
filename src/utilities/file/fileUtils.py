@@ -99,7 +99,7 @@ def create_sorted_img_dir():
 
 
 def generate_exiftool_config():
-    # Todo: Surley this can be improved too!!
+    # Todo: Sureley this can be improved too!!
     exif_conf_file = Path(settings.EXIFTOOL_CONFIG_FILE)
     if exif_conf_file.is_file():
 
@@ -124,7 +124,7 @@ def generate_exiftool_config():
         print(f"Done creating {settings.EXIFTOOL_CONFIG_FILE}.")
 
 
-def getImageFormat(full_filename):
+def get_image_format(full_filename):
     # img_format = ''
     # try:
     #     # Read image into imageio for data type
