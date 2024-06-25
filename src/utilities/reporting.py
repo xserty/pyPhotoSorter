@@ -38,7 +38,7 @@ class Reporting:
         print("")
         print("* GUI features")
         print("\t- Progress bar")
-        print("\t- Find Duplicates")
+        print("\t- Add 'Find Duplicates' feature")
         print("\t- Cleanup and let user decide where to store files: options.OPTIONS_PICKLE_FILE")
         print("\t- Cleanup and let user decide where to store files: options.DICTIONARY_PICKLE_FILE")
         print("\t- Cleanup and let user decide where to store files: options.DELETED_ITEMS_PICKLE_FILE")
