@@ -10,15 +10,7 @@ class Reporting:
 
     @staticmethod
     def print_stdout_report():
-        print("ToDo List:")
-        print("* Implement various command line options like:")
-        print("\t- Option to copy or move media files")
-        print("\t- Option to pass .ExifTool_config file location through parameter")
-        print("* Implement date priorities (date in filename, date in path, date in CreateDate exif, etc.)")
-        print("")
-        print("* GUI features")
-        print("\t- Progress bar")
-        print("\t- Find Duplicates")
+        Reporting.print_todo_list()
         print("")
         print("")
         print("###############################################")
@@ -33,6 +25,23 @@ class Reporting:
         print("Elapsed time: %s" % str(Reporting.dt_elapsed_time))
         if Reporting.dt_elapsed_time:
             print("Sorting took: %d days %02dh:%02dmin:%02dsec" % (Reporting.dt_elapsed_time.days, Reporting.dt_elapsed_time.seconds // 3600, Reporting.dt_elapsed_time.seconds // 60 % 60, Reporting.dt_elapsed_time.seconds % 60))
+
+    @staticmethod
+    def print_todo_list():
+        print("ToDo List:")
+        print("-\t Cleanup options.settings module")
+        print("")
+        print("* Implement various command line options like:")
+        print("\t- Option to copy or move media files")
+        print("\t- Option to pass .ExifTool_config file location through parameter")
+        print("* Implement date priorities (date in filename, date in path, date in CreateDate exif, etc.)")
+        print("")
+        print("* GUI features")
+        print("\t- Progress bar")
+        print("\t- Find Duplicates")
+        print("\t- Cleanup and let user decide where to store files: options.OPTIONS_PICKLE_FILE")
+        print("\t- Cleanup and let user decide where to store files: options.DICTIONARY_PICKLE_FILE")
+        print("\t- Cleanup and let user decide where to store files: options.DELETED_ITEMS_PICKLE_FILE")
 
     @staticmethod
     def reset():

@@ -259,7 +259,7 @@ def main_call(**args_dict):
         md.sorted_media_dir = args_dict['sorted_dir']
         md.unsorted_media_dir = args_dict['unsorted_dir']
         md.load_dictionary_from_pickle_file()
-        md.cleanup()
+        md.cleanup_media_dictionary()
         md.save_dictionary_to_pickle_file()
     else:
         if not args_dict['img_dir']:
@@ -270,7 +270,7 @@ def main_call(**args_dict):
         img_sort._main_media_sort()
         # cleanup the dictionary from entries that have no corresponding sorted file
         if img_sort.psMediaDictionary.is_cleanup_needed:
-            img_sort.psMediaDictionary.cleanup()
+            img_sort.psMediaDictionary.cleanup_media_dictionary()
         # save media dictionary to pickle file
         img_sort.psMediaDictionary.save_dictionary_to_pickle_file()
     # notify_with_notifpy("pyPhotoSorter", "Finished sorting images.")

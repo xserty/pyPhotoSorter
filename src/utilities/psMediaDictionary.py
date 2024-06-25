@@ -252,7 +252,7 @@ class MediaDictionary(dict):
             self.clear()
             self.is_cleanup_needed = False
 
-    def cleanup(self):
+    def cleanup_media_dictionary(self):
         # [ToDo] check this cleanup if it's doing a good job
 
         print("")

@@ -99,7 +99,7 @@ def create_sorted_img_dir():
 
 
 def generate_exiftool_config():
-    # Todo: Sureley this can be improved too!!
+    # Todo: Surely this can be improved too!!
     exif_conf_file = Path(settings.EXIFTOOL_CONFIG_FILE)
     if exif_conf_file.is_file():
 
@@ -129,7 +129,7 @@ def get_image_format(full_filename):
     # try:
     #     # Read image into imageio for data type
     #     # pic = imageio.imread(full_filename)
-    #     # [ToDo] Do we need PIL to get the image format? Do we need to know the image format?
+    #     # [ToDo] Do we need PIL to get the image format? Do we need to know the image format, or can we just deduce from the file extension?
     #     # Read image into PIL to extract basic metadata
     #     img = Image.open(full_filename)
     #     img_format = img.format
