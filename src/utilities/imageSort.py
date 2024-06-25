@@ -124,6 +124,7 @@ class ImageSort:
 
         count = 0
         print("Max threads set to: ", self.max_threads_num)
+
         with ThreadPoolExecutor(max_workers=self.max_threads_num) as executor:
 
             for dir_path, dir_names, filenames in os.walk(self.img_dir):

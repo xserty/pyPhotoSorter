@@ -246,7 +246,7 @@ class MainGUI(QMainWindow):
         if MainGUI._proc.is_alive():
             # MainWindow.proc.terminate()
             os.kill(MainGUI._proc.pid, signal.SIGINT)
-            print("Sending SIGINT to %s", MainGUI._proc)
+            print("Sending SIGINT to %s" % MainGUI._proc)
 
     def load_options(self):
         print("Loading options from disk")
