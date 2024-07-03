@@ -1,7 +1,7 @@
 import logging
 import os.path
 from datetime import datetime as dt
-from concurrent.futures import ThreadPoolExecutor, as_completed, wait, ALL_COMPLETED
+from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 import re
 
 from src.options import options
@@ -11,11 +11,11 @@ from src.utilities.reporting import Reporting
 from src.utilities.psMediaDictionary import MediaDictionary
 from src.utilities.file import fileUtils
 
-
 log = logging.getLogger('pyPhotoSorter.imageSort')
 
 # futures list
 futures = []
+
 
 class ImageSort:
 
@@ -69,6 +69,7 @@ class ImageSort:
             img_sort_instance.elapsed_time = end - begin
             Reporting.dt_elapsed_time = img_sort_instance.elapsed_time
             # print(f"Total time taken in :  {func.__name__}  {self.total_time}")
+
         return decorator
 
     def _sort_media(self, full_filename, ignore_date_in_file_path=False):
@@ -78,7 +79,8 @@ class ImageSort:
         # semaphore.acquire(blocking=True)
         # print("=== Semaphore value: ", semaphore._value)
         # get a sorted list of possible dates. position [0] being the oldest
-        list_of_possible_dates = get_all_possible_dates(full_filename, ignore_date_in_file_path=ignore_date_in_file_path)
+        list_of_possible_dates = get_all_possible_dates(full_filename,
+                                                        ignore_date_in_file_path=ignore_date_in_file_path)
 
         if not list_of_possible_dates:
             # move this file to unsorted
@@ -105,7 +107,8 @@ class ImageSort:
             if not os.path.exists(dest_dir):
                 os.makedirs(dest_dir)
         # write the psHashMap
-        self.psMediaDictionary.add(full_filename=full_filename, oldest_date_time=media_oldest_date, destination_dir=dest_dir, regenerate_media_dictionary=self.regen_media_dict)
+        self.psMediaDictionary.add(full_filename=full_filename, oldest_date_time=media_oldest_date,
+                                   destination_dir=dest_dir, regenerate_media_dictionary=self.regen_media_dict)
         # semaphore.release()
 
     @_calculate_time_decorator
@@ -163,7 +166,8 @@ class ImageSort:
                                 # print("Number of active threads: %d " % (threading.active_count() - 1))
                                 # print(threading.enumerate())
                             else:
-                                print("+++++++++++++++++++++++++++++++++++++++++++++ Ignoring extension: '%s'" % file_extension)
+                                print(
+                                    "+++++++++++++++++++++++++++++++++++++++++++++ Ignoring extension: '%s'" % file_extension)
 
         done, not_done = wait(futures, return_when=ALL_COMPLETED)
         # print("Done: %s", "\n", "Not Done: %s" % (str(done), str(not_done)))
@@ -221,7 +225,8 @@ class ImageSort:
                                 # print("Number of active threads: %d " % (threading.activeCount() - 1))
                                 # print(threading.enumerate())
                             else:
-                                print("+++++++++++++++++++++++++++++++++++++++++++++ Ignoring extension: '%s'" % file_extension)
+                                print(
+                                    "+++++++++++++++++++++++++++++++++++++++++++++ Ignoring extension: '%s'" % file_extension)
 
         done, not_done = wait(futures, return_when=ALL_COMPLETED)
         # print("Done: %s", "\n", "Not Done: %s" % (str(done), str(not_done)))

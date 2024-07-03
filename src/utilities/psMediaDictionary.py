@@ -4,7 +4,6 @@ import pickle
 from src.utilities.file import fileUtils
 from src.utilities.reporting import Reporting
 from src.options import options
-# from settings import DICTIONARY_PICKLE_FILE
 
 
 class MediaObject:

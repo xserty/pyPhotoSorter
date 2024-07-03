@@ -12,6 +12,7 @@ from src.utilities.reporting import Reporting
 # from src.settings import EXIFTOOL_CONFIG_FILE, HELPER_EXIF_CONFIG_FILE
 from src.options import options, settings
 
+
 def copy_file(full_filename, destination):
     """
     Copy a media file to destination
@@ -147,6 +148,7 @@ def get_image_format(full_filename):
     print(f"Format: {img_format}")
     return img_format
 
+
 # Found following here:
 # https://stackoverflow.com/questions/55394905/how-to-find-the-location-of-an-executable-in-python
 def _is_tool(name):
@@ -157,6 +159,7 @@ def _is_tool(name):
         if e.errno == errno.ENOENT:
             return False
     return True
+
 
 def find_prog(prog):
     if _is_tool(prog):
