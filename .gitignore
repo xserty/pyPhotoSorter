@@ -1,3 +1,10 @@
+psMediaDictionary.*
+deleted_items.*
+options.dat
+.ExifTool_config
+scripts/
+test.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
