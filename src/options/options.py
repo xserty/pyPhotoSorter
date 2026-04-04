@@ -1,48 +1,68 @@
 import os
 import pickle
+import threading
 
 '''
-Do we need a singleton?
-Can it be implemented in a module?
-If so, can data be saved and loaded to and from disk?
+Python loads a module only once per program, so instances created in a
+module are effectively singletons when used elsewhere in the program.
 '''
 
+# ------------------- internal lock -------------------
+_lock = threading.RLock()
 
+# ------------------- static state -------------------
 source_media_dir = ''
 sorted_media_dir = ''
 unsorted_media_dir = ''
+# flags
 deep_mode_hash = True
 regenerate_media_dictionary = False
 cleanup_dictionary = False
 ignore_date_in_path = False
-max_num_of_threads = 4 * os.cpu_count()
-
+# performance
+max_num_of_threads = 4 * (os.cpu_count() or 1)
+# paths
 HOME_DIR = os.path.expanduser("~")
+# derived paths
 OPTIONS_PICKLE_FILE = os.path.join(HOME_DIR, '.pyPhotoSorter_options.dat')
-DICTIONARY_PICKLE_FILE = os.path.join(sorted_media_dir, 'psMediaDictionary.dat')
-DELETED_ITEMS_PICKLE_FILE = os.path.join(sorted_media_dir, 'deleted_items.dat')
-
+dictionary_pickle_file = os.path.join(sorted_media_dir, 'psMediaDictionary.dat')
+deleted_items_pickle_file =  os.path.join(sorted_media_dir, 'deleted_items.dat')
 
 def save_to_disk():
-    options_dict = {"source_media_dir": source_media_dir, "sorted_media_dir": sorted_media_dir, "unsorted_media_dir": unsorted_media_dir, "deep_mode_hash": deep_mode_hash, "regenerate_media_dictionary": regenerate_media_dictionary, "cleanup_dictionary": cleanup_dictionary, "ignore_date_in_path": ignore_date_in_path, "max_num_of_threads": max_num_of_threads}
+    with _lock:
+        data = {
+            "source_media_dir": source_media_dir,
+            "sorted_media_dir": sorted_media_dir,
+            "unsorted_media_dir": unsorted_media_dir,
+            "deep_mode_hash": deep_mode_hash,
+            "regenerate_media_dictionary": regenerate_media_dictionary,
+            "cleanup_dictionary": cleanup_dictionary,
+            "ignore_date_in_path": ignore_date_in_path,
+            "max_num_of_threads": max_num_of_threads,
+        }
 
-    with open(OPTIONS_PICKLE_FILE, 'wb') as file:
-        print("saving: ", OPTIONS_PICKLE_FILE)
-        pickle.dump(options_dict, file)
-
+    with open(OPTIONS_PICKLE_FILE, "wb") as f:
+        pickle.dump(data, f)
 
 def load_from_disk():
-    """try load self.name.txt"""
-    with open(OPTIONS_PICKLE_FILE, 'rb') as file:
-        global source_media_dir, sorted_media_dir, unsorted_media_dir, deep_mode_hash, regenerate_media_dictionary, cleanup_dictionary, ignore_date_in_path, max_num_of_threads
-        print("loading: ", OPTIONS_PICKLE_FILE)
-        options_dict = pickle.load(file)
-        source_media_dir = options_dict["source_media_dir"]
-        sorted_media_dir = options_dict["sorted_media_dir"]
-        unsorted_media_dir = options_dict["unsorted_media_dir"]
+    global source_media_dir, sorted_media_dir, unsorted_media_dir
+    global deep_mode_hash, regenerate_media_dictionary
+    global cleanup_dictionary, ignore_date_in_path, max_num_of_threads
 
-        deep_mode_hash = options_dict["deep_mode_hash"]
-        regenerate_media_dictionary = options_dict["regenerate_media_dictionary"]
-        cleanup_dictionary = options_dict["cleanup_dictionary"]
-        ignore_date_in_path = options_dict["ignore_date_in_path"]
-        max_num_of_threads = options_dict["max_num_of_threads"]
+    if not os.path.exists(OPTIONS_PICKLE_FILE):
+        return False
+
+    with open(OPTIONS_PICKLE_FILE, "rb") as f:
+        data = pickle.load(f)
+
+    with _lock:
+        source_media_dir = data.get("source_media_dir", "")
+        sorted_media_dir = data.get("sorted_media_dir", "")
+        unsorted_media_dir = data.get("unsorted_media_dir", "")
+        deep_mode_hash = data.get("deep_mode_hash", True)
+        regenerate_media_dictionary = data.get("regenerate_media_dictionary", False)
+        cleanup_dictionary = data.get("cleanup_dictionary", False)
+        ignore_date_in_path = data.get("ignore_date_in_path", False)
+        max_num_of_threads = data.get("max_num_of_threads", max_num_of_threads)
+
+    return True

@@ -10,7 +10,8 @@ from sys import platform
 
 from src.utilities.reporting import Reporting
 # from src.settings import EXIFTOOL_CONFIG_FILE, HELPER_EXIF_CONFIG_FILE
-from src.options import options, settings
+from src.options import settings
+from src.options import options
 
 
 def copy_file(full_filename, destination):
@@ -85,18 +86,18 @@ def copy_media_to_unsorted_dir(src_file, target_dir):
     Reporting.total_num_of_unsorted_files += 1
 
 
-def remove_sorted_img_dir():
-    if os.path.exists(options.source_media_dir):
-        shutil.rmtree(options.source_media_dir)
-        print(f"'{options.source_media_dir}' directory removed successfully")
+def remove_sorted_img_dir(source_media_dir):
+    if os.path.exists(source_media_dir):
+        shutil.rmtree(source_media_dir)
+        print(f"'{source_media_dir}' directory removed successfully")
 
 
-def create_sorted_img_dir():
-    if not os.path.exists(options.source_media_dir):
-        os.mkdir(options.source_media_dir)
-        print(f"'{options.source_media_dir}' directory created successfully")
+def create_sorted_img_dir(source_media_dir):
+    if not os.path.exists(source_media_dir):
+        os.mkdir(source_media_dir)
+        print(f"'{source_media_dir}' directory created successfully")
     else:
-        print(f"'{options.source_media_dir}' directory exists already")
+        print(f"'{source_media_dir}' directory exists already")
 
 
 def generate_exiftool_config():
@@ -115,7 +116,6 @@ def generate_exiftool_config():
             # the file ExifTool_config does not exist
             print(f"Creating {settings.EXIFTOOL_CONFIG_FILE}.")
             shutil.copy(settings.HELPER_EXIF_CONFIG_FILE, f"{settings.EXIFTOOL_CONFIG_FILE}")
-            print(f"Done creating {settings.EXIFTOOL_CONFIG_FILE}.")
         else:
             print(f"No need to replace {settings.EXIFTOOL_CONFIG_FILE}.")
 
@@ -145,7 +145,7 @@ def get_image_format(full_filename):
     #     print("WARNING: Getting format from file extension.")
     filename, file_extension = os.path.splitext(full_filename)
     img_format = file_extension.split('.')[1]
-    print(f"Format: {img_format}")
+    print(f"[%s] Format: {img_format}" % full_filename)
     return img_format
 
 
@@ -163,8 +163,9 @@ def _is_tool(name):
 
 def find_prog(prog):
     if _is_tool(prog):
-        cmd = "where" if platform.system() == "Windows" else "which"
+        cmd = "where" if platform == "Windows" else "which"
         try:
             return subprocess.check_output([cmd, prog])
         except subprocess.CalledProcessError:
             return None
+    return None

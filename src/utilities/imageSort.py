@@ -69,7 +69,6 @@ class ImageSort:
             img_sort_instance.elapsed_time = end - begin
             Reporting.dt_elapsed_time = img_sort_instance.elapsed_time
             # print(f"Total time taken in :  {func.__name__}  {self.total_time}")
-
         return decorator
 
     def _sort_media(self, full_filename, ignore_date_in_file_path=False):
@@ -84,7 +83,7 @@ class ImageSort:
 
         if not list_of_possible_dates:
             # move this file to unsorted
-            print("WARNING: Unable to find a date for this file.")
+            print("[%s] WARNING: Unable to find a date for this file." % full_filename)
             media_obj = self.psMediaDictionary.get_media_object_by_filename(full_filename)
             if media_obj:
                 print("Existing media object in dictionary has following oldest date: %s" % media_obj.oldest_date)
@@ -118,6 +117,7 @@ class ImageSort:
         print(f"Parameters passed: ")
         print(f"\tMedia directory to be sorted: '{self.img_dir}'")
         print(f"\tOutput directory of sorted media: '{self.sorted_dir}'")
+        print(f"\tOutput directory of unsorted media: '{self.unsorted_dir}'")
         # total number of files in directory and subdirectories
         cpt = sum([len(files) for r, d, files in os.walk(self.img_dir)])
         print("Total number of media files to sort: %i" % cpt)
@@ -166,14 +166,14 @@ class ImageSort:
                                 # print("Number of active threads: %d " % (threading.active_count() - 1))
                                 # print(threading.enumerate())
                             else:
-                                print(
-                                    "+++++++++++++++++++++++++++++++++++++++++++++ Ignoring extension: '%s'" % file_extension)
+                                print("++++++++++++ Ignoring extension: '%s'" % file_extension)
 
         done, not_done = wait(futures, return_when=ALL_COMPLETED)
-        # print("Done: %s", "\n", "Not Done: %s" % (str(done), str(not_done)))
+        #print("Done: %s \nNot Done: %s" % (str(done), str(not_done)))
 
         print('===================================================================================================')
         print('Sort finished')
+        print('- Dictionary:')
         print(self.psMediaDictionary)
         print('Saving dictionary...')
         self.psMediaDictionary.save_dictionary_to_pickle_file()
@@ -184,7 +184,7 @@ class ImageSort:
         Reporting.reset()
         self.ignore_date_in_path = ignore_date_in_path
         # rename existing pickle dictionary file
-        fileUtils.backup_file(full_filename=options.DICTIONARY_PICKLE_FILE)
+        fileUtils.backup_file(full_filename=options.dictionary_pickle_file)
 
         # total number of files in directory and subdirectories
         cpt = sum([len(files) for r, d, files in os.walk(self.sorted_dir)])
@@ -199,37 +199,36 @@ class ImageSort:
                     count += 1
                     Reporting.total_num_of_files += 1
                     full_filename = os.path.join(dir_path, filename)
-                    print("")
-                    print("===============================")
+                    print("\n===============================")
 
                     percent = count / cpt * 100
-                    display = f"Processing file {count}/{cpt} ("
-                    display += '{:.2f}%'.format(percent)
-                    display += ")"
+                    display = (
+                        f"Processing file {count}/{cpt} "
+                        f"({percent:.2f}%)\n"
+                        f"\t{full_filename}\n"
+                    )
                     print(display)
-                    print(f"\t\t{full_filename}")
-                    print("")
                     file_extension = fileUtils.get_image_format(full_filename)
 
                     match file_extension.lower():
                         case 'crc' | 'bak' | 'ini' | '411' | 'thm' | 'htm' | 'html' | 'json' | 'txt' | 'db' | 'log' | 'tgz' | 'aae' | 'xcf' | 'zip' | 'pdf' | 'odt' | 'sla' | 'odg' | 'svg' | 'ora' | 'b64' | 'ind':
-                            print("INFO: Ignoring file...")
+                            print(f"[%s] INFO: Ignoring file..." % filename)
                             Reporting.total_num_of_ignored_files += 1
                         case _:
                             regex = re.compile(r"~\d*~")
                             if not regex.match(file_extension):
-                                print("Sorting file...")
+                                print(f"[%s] Sorting file..." % filename)
                                 # execute the task, passing the event
                                 future = executor.submit(self._sort_media, full_filename, options.ignore_date_in_path)
                                 futures.append(future)
                                 # print("Number of active threads: %d " % (threading.activeCount() - 1))
                                 # print(threading.enumerate())
                             else:
-                                print(
-                                    "+++++++++++++++++++++++++++++++++++++++++++++ Ignoring extension: '%s'" % file_extension)
+                                print("+++++++++++++++++++++++++++++++++++++++++ Ignoring extension: '%s'" % file_extension)
 
         done, not_done = wait(futures, return_when=ALL_COMPLETED)
-        # print("Done: %s", "\n", "Not Done: %s" % (str(done), str(not_done)))
+        #print("[%s] Done: %s \nNot Done: %s" % (filename, str(done), str(not_done)))
+
 
         print('===================================================================================================')
         print('Sort finished')
@@ -245,7 +244,7 @@ def main_call(**args_dict):
     try:
         generate_exiftool_config()
         # removeSortedImgDir()
-        create_sorted_img_dir()
+        create_sorted_img_dir(args_dict.get('sorted_dir'))
     except (FileNotFoundError, OSError) as e:
         print(f'Caught {type(e)}: {e}')
     if args_dict['regen_media_dict'] and args_dict['cleanup_dictionary']:

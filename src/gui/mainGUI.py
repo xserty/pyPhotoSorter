@@ -7,7 +7,8 @@ from PySide6.QtCore import QSize, QRect
 from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QFrame, QMenuBar, QMenu, QCheckBox, \
     QMessageBox, QStatusBar, QSpinBox, QMainWindow, QPushButton, QFileDialog, QWidget, QProgressBar
 
-from src.options import options, settings
+from src.options import settings
+from src.options import options
 from src.utilities import imageSort
 
 
@@ -203,7 +204,7 @@ class MainGUI(QMainWindow):
 
     @classmethod
     def show_advanced_settings(cls):
-        # Logic for showing an about dialog content goes here...
+        # Logic for showing an "About" dialog content goes here...
         dlg = QMessageBox()
         dlg.setWindowTitle("About")
         dlg.setText("This is a simple dialog")
@@ -216,7 +217,7 @@ class MainGUI(QMainWindow):
 
     @classmethod
     def show_about_dialog(cls):
-        # Logic for showing an about dialog content goes here...
+        # Logic for showing an "About" dialog content goes here...
         dlg = QMessageBox()
         dlg.setWindowTitle("About")
         about_text = "<h3>pyPhotoSorter</h3> was brought to you by...<br><em>Stefano</em>"
@@ -233,7 +234,10 @@ class MainGUI(QMainWindow):
         self.populate_options_instance()
 
         # Pass arguments via a dictionary
-        args_dict = {'img_dir': options.source_media_dir, 'sorted_dir': options.sorted_media_dir, 'unsorted_dir': options.unsorted_media_dir, 'deep_mode_hash': options.deep_mode_hash, 'ignore_date_in_path': options.ignore_date_in_path, 'regen_media_dict': options.regenerate_media_dictionary, 'cleanup_dictionary': options.cleanup_dictionary, 'max_threads_num': options.max_num_of_threads}
+        args_dict = {'img_dir': options.source_media_dir, 'sorted_dir': options.sorted_media_dir,
+                     'unsorted_dir': options.unsorted_media_dir, 'deep_mode_hash': options.deep_mode_hash,
+                     'ignore_date_in_path': options.ignore_date_in_path, 'regen_media_dict': options.regenerate_media_dictionary,
+                     'cleanup_dictionary': options.cleanup_dictionary, 'max_threads_num': options.max_num_of_threads}
 
         # spawn process to sort media files
         MainGUI._proc = multiprocessing.Process(target=imageSort.main_call, kwargs=args_dict)
@@ -300,8 +304,7 @@ class MainGUI(QMainWindow):
         folder_path = dialog.getExistingDirectory(None, "Select Folder")
         # print("Media destination path:", folder_path)
         self.dest_label.setText(folder_path)
-        self.unsorted_label.setText(str(os.path.join(folder_path, settings.UNSORTED_MEDIA_DIR)))
-
+        self.unsorted_label.setText(str(os.path.join(folder_path, options.unsorted_media_dir)))
         return folder_path
 
     def select_unsorted_dir(self):

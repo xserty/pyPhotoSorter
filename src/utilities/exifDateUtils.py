@@ -5,7 +5,6 @@ import struct
 
 import exifread
 import exiftool
-from exifread.heic import NoParser
 from exiftool.exceptions import ExifToolExecuteError
 
 from dateutil import parser
@@ -19,17 +18,16 @@ from src.utilities.file import fileUtils
 
 def _get_date_in_filename(ff_name):
     filename = os.path.basename(ff_name)
-    regex1 = re.compile(r"(\d{8})")  # regex pattern to capture possible date
-    match_array = regex1.findall(filename)
-    if not match_array:
+    # look for an 8-digit candidate date
+    m = re.search(r"(19|20)\d{2}[01]\d[0-3]\d", filename)
+    if not m:
         return False
-    date = match_array[0]
-    year = date[0:4]
-    month = date[4:6]
-    day = date[6:8]
-    print("Possible date from filename:", date)
-    print("\t", year, month, day)
-    result = year + ':' + month + ':' + day
+    date_str = m.group()
+    try:
+        dt = datetime.date.strptime(date_str, "%Y%m%d")
+    except ValueError:
+        return False  # invalid calendar date
+    result = dt.strftime("%Y:%m:%d")
     return result
 
 
@@ -133,8 +131,8 @@ def __format_date(date_time_str):
             result = get_correct_date_format(result.strftime("%Y:%d/%m %H:%M:%S"))
             print("\t\tGot this --> %s" % result)
         elif '  ' in dt:
-            # lets check for this date: 2006.09.17  15:32:15	(valid, but with double spaces for some reason!)
-            #                           ----------^^
+            # let's check for this date: 2006.09.17  15:32:15	(valid, but with double spaces for some reason!)
+            #                            ----------^^
             # remove double spaces
             dt = dt.replace('  ', ' ')
             try:
@@ -332,7 +330,7 @@ def _get_date_in_file_path(ff_name):
                 day = parts[i + 2]
 
             result = part + ':' + month + ':' + day
-            print(result)
+            print(f"[%s] %s\n" % ff_name, result)
             return result
         i += 1
     return None
@@ -358,12 +356,12 @@ def _get_tags_with_exif_tool(ff_name):
         try:
             tags = ex.get_metadata(ff_name)
         except UnicodeDecodeError as er:
-            print("UnicodeDecodeError: %s" % er.reason)
+            print(f"[%s] UnicodeDecodeError: %s\n" % ff_name, er.reason)
         except ExifToolExecuteError as er:
-            print("ExifToolExecuteError: %s" % er)
+            print(f"[%s] ExifToolExecuteError: %s\n" % ff_name, er)
 
     if not tags:
-        print(f"################ NO TAGS FOUND: ####################")
+        print(f"[%s] NO TAGS FOUND: ####################\n" % ff_name)
         # [ToDo] Try to find alternative way to read exif data...
         return __exif_result_array
 
@@ -374,14 +372,13 @@ def _get_tags_with_exif_tool(ff_name):
             if isinstance(v, str):
                 # [ToDo] We got this '0000:00:00' date even though should be excluded from the .ExifTool_config file
                 if "0000:00:00" in v:
-                    print("WARNING: Skipping tag (%s: %s)" % (k, v))
+                    print("[%s] WARNING: Skipping tag (%s: %s)\n" % ff_name, (k, v))
                 else:
                     tag_compile = k, str(v)
                     __exif_result_array.append(tag_compile)
         except TypeError as er:
-            print("Error parsing tag %s: %s" % (k, v))
-            print(str(er))
-
+            print("[%s] Error parsing tag %s: %s\n" % ff_name, (k, v))
+            print(f"[%s] %s\n" % ff_name, str(er))
     return __exif_result_array
 
 
@@ -398,21 +395,22 @@ def _get_tags_with_exifread(ff_name):
         tags = []
         try:
             # https://pypi.org/project/ExifRead/
-            # Supported formats: TIFF, JPEG, PNG, Webp, HEIC
-            # For ExifTool check this:0https://stackoverflow.com/questions/77038678/how-to-extract-metadata-from-heic-image-files-on-windows-11-with-python
+            # Supported formats: TIFF, JPEG, PNG, Webp
+            # HEIC support was dropped in later versions
+            # For ExifTool check this: https://stackoverflow.com/questions/77038678/how-to-extract-metadata-from-heic-image-files-on-windows-11-with-python
             tags = exifread.process_file(f)
-        except (struct.error, IndexError, NoParser) as err:
-            print(f"ERROR: Unable to process this file. Unexpected {err=}, {type(err)=}")
+        except (struct.error, IndexError) as err:
+            print(f"[%s] ERROR: Unable to process this file. Unexpected {err=}, {type(err)=}\n" % ff_name)
         except KeyError as err:
             # [ToDo] to be implemented: Big Endian exif data loading
             #  we get this error when the exif data is saved as big endian
-            print(f"ERROR: Unable to process this file. Unexpected {err=}, {type(err)=}")
-            print("NOTE: File might be in Big Endian format")
-            print("ERROR: Unable to process this file. (KeyError. Exception caught: '%s')" % err)
+            print(f"[%s] ERROR: Unable to process this file. Unexpected {err=}, {type(err)=}\n" % ff_name)
+            print(f"[%s] NOTE: File might be in Big Endian format" % ff_name)
+            print(f"[%s] ERROR: Unable to process this file. (KeyError. Exception caught: '%s')\n" % ff_name, err)
 
         if not tags:
             # no tags found with exifread
-            print("####### NO TAGS FOUND")
+            print(f"[%s] ####### NO TAGS FOUND\n" % ff_name)
             # [ToDo] Try to find alternative way to read exif data: use ExifTool!
             #           If ExifTool does not find tags, there are none.
             return __exif_result_array
@@ -426,7 +424,7 @@ def _get_tags_with_exifread(ff_name):
                 tag_compile = i, str(tag)
                 __exif_result_array.append(tag_compile)
             except TypeError as er:
-                print("Error parsing tag %s: %s" % (i, str(er)))
+                print(f"[%s] Error parsing tag %s: %s\n" % ff_name, i, str(er))
     return __exif_result_array
 
 
@@ -437,21 +435,21 @@ def get_all_possible_dates(ff_name, ignore_date_in_file_path=False):
         # check if path contains a date
         date = _get_date_in_file_path(ff_name)
         if date:
-            # print("getDateInFilePath: %s" % date)
+            print("[%s] getDateInFilePath: %s\n" % ff_name, date)
             result.append(date)
     else:
-        print("WARNING: Ignoring dates in file path (e.g.: /1999/08/27/)")
+        print("[$ff_name] WARNING: Ignoring dates in file path (e.g.: /1999/08/27/)")
 
     # check if filename contains a date
     date = _get_date_in_filename(ff_name)
     if date:
-        print("getDateInFilename: %s" % date)
+        print(f"[%s] getDateInFilename: %s\n" % ff_name, date)
         result.append(date)
     exif_array = _get_tags_with_exif_tool(ff_name)
     exif_array_2 = _get_tags_with_exifread(ff_name)
     if len(exif_array) < len(exif_array_2):
-        print("======= WARNING: len(exif_array) = %s, len(exif_array_2) = %s" % (len(exif_array), len(exif_array_2)))
-        print("=======          Exifread contains more tags")
+        print("[%s] ======= WARNING: len(exif_array) = %s, len(exif_array_2) = %s\n" % ff_name, (len(exif_array), len(exif_array_2)))
+        print("[%s] =======          Exifread contains more tags\n" % ff_name)
     # print('exifArray:')
     # print(exif_array)
     # now we have exif_array full of date tags
@@ -460,6 +458,5 @@ def get_all_possible_dates(ff_name, ignore_date_in_file_path=False):
         result.append(date)
     # sort the list so that the oldest date is first
     result.sort()
-    print('')
-    print("List of dates considering: %s" % result)
+    print("[%s] List of dates considering: %s\n" % ff_name, result)
     return result
