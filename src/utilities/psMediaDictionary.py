@@ -210,19 +210,19 @@ class MediaDictionary(dict):
         return self._get(ps_key=ps_key)
 
     def save_dictionary_to_pickle_file(self):
-        with open(options.dictionary_pickle_file, 'wb') as f:
+        with open(options.get_dictionary_pickle_file(), 'wb') as f:
             pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
         print("Saved dictionary. Size: %s " % len(self))
 
     def load_dictionary_from_pickle_file(self):
         # create a backup of the dictionary file first
-        fileUtils.backup_file(full_filename=options.dictionary_pickle_file)
+        fileUtils.backup_file(full_filename=options.get_dictionary_pickle_file())
 
-        print("Attempting to load dictionary file %s" % options.dictionary_pickle_file)
+        print("Attempting to load dictionary file %s" % options.get_dictionary_pickle_file())
         is_existing_dict_file_from_different_sort_dir = False
         sorted_media_dir_loaded_from_dictionary = ''
         try:
-            with open(options.dictionary_pickle_file, 'rb') as f:
+            with open(options.get_dictionary_pickle_file(), 'rb') as f:
                 content = pickle.load(f)
 
                 # check if dictionary belongs to some other sorted media directory
@@ -285,11 +285,10 @@ class MediaDictionary(dict):
             print("Cleanup done! Total number of entries removed from dictionary: %d" % removed)
             print("New dictionary size: %s " % len(self))
             # save the list of items that have been deleted
-
-            fileUtils.backup_file(options.deleted_items_pickle_file)
-            with open(options.deleted_items_pickle_file, 'wb') as f:
+            fileUtils.backup_file(options.get_deleted_items_pickle_file())
+            with open(options.get_deleted_items_pickle_file(), 'wb') as f:
                 pickle.dump(media_dict_items_to_be_removed, f, protocol=pickle.HIGHEST_PROTOCOL)
-            print("Deleted items list has been saved in %s" % options.deleted_items_pickle_file)
+            print("Deleted items list has been saved in %s" % options.get_deleted_items_pickle_file())
             print("Deleted items list size: %s " % len(media_dict_items_to_be_removed))
         else:
             print("MediaDictionary was clean. No entries removed")

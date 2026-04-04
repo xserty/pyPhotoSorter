@@ -25,8 +25,25 @@ max_num_of_threads = 4 * (os.cpu_count() or 1)
 HOME_DIR = os.path.expanduser("~")
 # derived paths
 OPTIONS_PICKLE_FILE = os.path.join(HOME_DIR, '.pyPhotoSorter_options.dat')
-dictionary_pickle_file = os.path.join(sorted_media_dir, 'psMediaDictionary.dat')
-deleted_items_pickle_file =  os.path.join(sorted_media_dir, 'deleted_items.dat')
+def get_dictionary_pickle_file():
+    """Return the path for the media dictionary pickle file.
+
+    The file is stored in `sorted_media_dir` when set, otherwise falls back to the
+    current working directory.
+    """
+    if sorted_media_dir:
+        return os.path.join(sorted_media_dir, 'psMediaDictionary.dat')
+    return os.path.join(os.getcwd(), 'psMediaDictionary.dat')
+
+
+def get_deleted_items_pickle_file():
+    """Return the path for the deleted-items pickle file.
+
+    Stored next to the media dictionary inside `sorted_media_dir` when available.
+    """
+    if sorted_media_dir:
+        return os.path.join(sorted_media_dir, 'deleted_items.dat')
+    return os.path.join(os.getcwd(), 'deleted_items.dat')
 
 def save_to_disk():
     with _lock:

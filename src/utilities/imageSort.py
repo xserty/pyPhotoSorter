@@ -54,6 +54,14 @@ class ImageSort:
         self.psMediaDictionary.deepModeHash = self.deep_mode_hash
         self.psMediaDictionary.sorted_media_dir = self.sorted_dir
         self.psMediaDictionary.unsorted_media_dir = self.unsorted_dir
+        # keep global options in sync so that pickle paths are computed correctly
+        try:
+            options.sorted_media_dir = self.sorted_dir
+            options.unsorted_media_dir = self.unsorted_dir
+        except Exception:
+            # defensive: options may be a simple module, but in any unexpected case
+            # ignore assignment errors to avoid breaking execution
+            pass
 
     # Decorator to calculate duration taken by any function
     def _calculate_time_decorator(func):
@@ -184,7 +192,7 @@ class ImageSort:
         Reporting.reset()
         self.ignore_date_in_path = ignore_date_in_path
         # rename existing pickle dictionary file
-        fileUtils.backup_file(full_filename=options.dictionary_pickle_file)
+        fileUtils.backup_file(full_filename=options.get_dictionary_pickle_file())
 
         # total number of files in directory and subdirectories
         cpt = sum([len(files) for r, d, files in os.walk(self.sorted_dir)])
