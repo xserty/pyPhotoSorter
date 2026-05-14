@@ -111,8 +111,7 @@ class ImageSort:
         dest_dir = ''
         if not self.regen_media_dict:
             dest_dir = os.path.join(self.sorted_dir, year, month, day)
-            if not os.path.exists(dest_dir):
-                os.makedirs(dest_dir)
+            os.makedirs(dest_dir, exist_ok=True)
         # write the psHashMap
         self.psMediaDictionary.add(full_filename=full_filename, oldest_date_time=media_oldest_date,
                                    destination_dir=dest_dir, regenerate_media_dictionary=self.regen_media_dict)
@@ -177,7 +176,9 @@ class ImageSort:
                                 print("++++++++++++ Ignoring extension: '%s'" % file_extension)
 
         done, not_done = wait(futures, return_when=ALL_COMPLETED)
-        #print("Done: %s \nNot Done: %s" % (str(done), str(not_done)))
+        for f in done:
+            if f.exception():
+                log.error("Exception in _sort_media: %s", f.exception(), exc_info=f.exception())
 
         print('===================================================================================================')
         print('Sort finished')

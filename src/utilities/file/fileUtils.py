@@ -144,7 +144,10 @@ def get_image_format(full_filename):
     # if not img_format:
     #     print("WARNING: Getting format from file extension.")
     filename, file_extension = os.path.splitext(full_filename)
-    img_format = file_extension.split('.')[1]
+    parts = file_extension.split('.')
+    if len(parts) < 2 or not parts[1]:
+        return ''
+    img_format = parts[1]
     print(f"[%s] Format: {img_format}" % full_filename)
     return img_format
 

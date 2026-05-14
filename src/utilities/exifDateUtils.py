@@ -24,7 +24,7 @@ def _get_date_in_filename(ff_name):
         return False
     date_str = m.group()
     try:
-        dt = datetime.date.strptime(date_str, "%Y%m%d")
+        dt = datetime.datetime.strptime(date_str, "%Y%m%d")
     except ValueError:
         return False  # invalid calendar date
     result = dt.strftime("%Y:%m:%d")
@@ -330,7 +330,7 @@ def _get_date_in_file_path(ff_name):
                 day = parts[i + 2]
 
             result = part + ':' + month + ':' + day
-            print(f"[%s] %s\n" % ff_name, result)
+            print("[%s] %s" % (ff_name, result))
             return result
         i += 1
     return None
@@ -345,7 +345,10 @@ def _get_tags_with_exif_tool(ff_name):
     # Create an empty array
     __exif_result_array = []
     tags = []
-    exiftool_path = fileUtils.find_prog("exiftool").decode("utf-8")
+    _prog = fileUtils.find_prog("exiftool")
+    if _prog is None:
+        return __exif_result_array
+    exiftool_path = _prog.decode("utf-8").strip()
     os.environ['EXIFTOOL_PATH'] = exiftool_path
     # Open image to collect EXIF data
     # [ToDo] load config file not working... picking up '0000:00:00' dates. Maybe incompatible versions?
@@ -356,9 +359,9 @@ def _get_tags_with_exif_tool(ff_name):
         try:
             tags = ex.get_metadata(ff_name)
         except UnicodeDecodeError as er:
-            print(f"[%s] UnicodeDecodeError: %s\n" % ff_name, er.reason)
+            print("[%s] UnicodeDecodeError: %s" % (ff_name, er.reason))
         except ExifToolExecuteError as er:
-            print(f"[%s] ExifToolExecuteError: %s\n" % ff_name, er)
+            print("[%s] ExifToolExecuteError: %s" % (ff_name, er))
 
     if not tags:
         print(f"[%s] NO TAGS FOUND: ####################\n" % ff_name)
@@ -372,13 +375,13 @@ def _get_tags_with_exif_tool(ff_name):
             if isinstance(v, str):
                 # [ToDo] We got this '0000:00:00' date even though should be excluded from the .ExifTool_config file
                 if "0000:00:00" in v:
-                    print("[%s] WARNING: Skipping tag (%s: %s)\n" % ff_name, (k, v))
+                    print("[%s] WARNING: Skipping tag (%s: %s)" % (ff_name, k, v))
                 else:
                     tag_compile = k, str(v)
                     __exif_result_array.append(tag_compile)
         except TypeError as er:
-            print("[%s] Error parsing tag %s: %s\n" % ff_name, (k, v))
-            print(f"[%s] %s\n" % ff_name, str(er))
+            print("[%s] Error parsing tag %s: %s" % (ff_name, k, v))
+            print("[%s] %s" % (ff_name, str(er)))
     return __exif_result_array
 
 
@@ -406,7 +409,7 @@ def _get_tags_with_exifread(ff_name):
             #  we get this error when the exif data is saved as big endian
             print(f"[%s] ERROR: Unable to process this file. Unexpected {err=}, {type(err)=}\n" % ff_name)
             print(f"[%s] NOTE: File might be in Big Endian format" % ff_name)
-            print(f"[%s] ERROR: Unable to process this file. (KeyError. Exception caught: '%s')\n" % ff_name, err)
+            print("[%s] ERROR: Unable to process this file. (KeyError. Exception caught: '%s')" % (ff_name, err))
 
         if not tags:
             # no tags found with exifread
@@ -424,7 +427,7 @@ def _get_tags_with_exifread(ff_name):
                 tag_compile = i, str(tag)
                 __exif_result_array.append(tag_compile)
             except TypeError as er:
-                print(f"[%s] Error parsing tag %s: %s\n" % ff_name, i, str(er))
+                print("[%s] Error parsing tag %s: %s" % (ff_name, i, str(er)))
     return __exif_result_array
 
 
@@ -435,7 +438,7 @@ def get_all_possible_dates(ff_name, ignore_date_in_file_path=False):
         # check if path contains a date
         date = _get_date_in_file_path(ff_name)
         if date:
-            print("[%s] getDateInFilePath: %s\n" % ff_name, date)
+            print("[%s] getDateInFilePath: %s" % (ff_name, date))
             result.append(date)
     else:
         print("[$ff_name] WARNING: Ignoring dates in file path (e.g.: /1999/08/27/)")
@@ -443,13 +446,13 @@ def get_all_possible_dates(ff_name, ignore_date_in_file_path=False):
     # check if filename contains a date
     date = _get_date_in_filename(ff_name)
     if date:
-        print(f"[%s] getDateInFilename: %s\n" % ff_name, date)
+        print("[%s] getDateInFilename: %s" % (ff_name, date))
         result.append(date)
     exif_array = _get_tags_with_exif_tool(ff_name)
     exif_array_2 = _get_tags_with_exifread(ff_name)
     if len(exif_array) < len(exif_array_2):
-        print("[%s] ======= WARNING: len(exif_array) = %s, len(exif_array_2) = %s\n" % ff_name, (len(exif_array), len(exif_array_2)))
-        print("[%s] =======          Exifread contains more tags\n" % ff_name)
+        print("[%s] WARNING: len(exif_array) = %s, len(exif_array_2) = %s" % (ff_name, len(exif_array), len(exif_array_2)))
+        print("[%s] Exifread contains more tags" % ff_name)
     # print('exifArray:')
     # print(exif_array)
     # now we have exif_array full of date tags
@@ -458,5 +461,5 @@ def get_all_possible_dates(ff_name, ignore_date_in_file_path=False):
         result.append(date)
     # sort the list so that the oldest date is first
     result.sort()
-    print("[%s] List of dates considering: %s\n" % ff_name, result)
+    print("[%s] List of dates considering: %s" % (ff_name, result))
     return result

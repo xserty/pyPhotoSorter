@@ -32,8 +32,8 @@ def get_dictionary_pickle_file():
     current working directory.
     """
     if sorted_media_dir:
-        return os.path.join(sorted_media_dir, 'psMediaDictionary.dat')
-    return os.path.join(os.getcwd(), 'psMediaDictionary.dat')
+        return os.path.join(sorted_media_dir, '.psMediaDictionary.dat')
+    return os.path.join(os.getcwd(), '.psMediaDictionary.dat')
 
 
 def get_deleted_items_pickle_file():
